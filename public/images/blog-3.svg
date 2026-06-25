@@ -1,0 +1,11 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="30" fill="#FFFBEB"/>
+  <path d="M0 340C140 300 260 360 400 320C540 280 640 330 800 300V480H0V340Z" fill="#DC2626"/>
+  <path d="M0 260C120 220 240 280 360 250C480 220 600 270 800 220V260H0V260Z" fill="#F97316"/>
+  <path d="M480 110C480 152.137 444.137 188 402 188C359.863 188 324 152.137 324 110C324 67.8629 359.863 32 402 32C444.137 32 480 67.8629 480 110Z" fill="#991B1B"/>
+  <path d="M420 118H435V232H420V118Z" fill="#FBBF24"/>
+  <path d="M240 180C240 180 230 220 256 242C282 264 318 268 348 240C378 212 364 180 364 180H240Z" fill="#F59E0B"/>
+  <path d="M180 190C180 190 220 160 280 170C340 180 390 230 390 230H180V190Z" fill="#EF4444"/>
+  <text x="70" y="120" font-family="sans-serif" font-size="40" font-weight="700" fill="#7C2D12">Nasi</text>
+  <text x="70" y="170" font-family="sans-serif" font-size="24" fill="#7C2D12">Indonesian food</text>
+</svg>

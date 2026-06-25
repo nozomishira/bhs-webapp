@@ -1,0 +1,12 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="30" fill="#FFF7ED"/>
+  <path d="M0 360C160 300 240 340 400 300C560 260 640 320 800 280V480H0V360Z" fill="#F97316"/>
+  <path d="M0 240C140 200 220 220 360 200C500 180 620 220 800 180V240H0V240Z" fill="#FCD34D"/>
+  <path d="M90 300L190 140L310 300H90Z" fill="#EF4444"/>
+  <path d="M120 300H280L250 200H150L120 300Z" fill="#FB923C"/>
+  <path d="M480 180C480 218.091 444.091 254 406 254C367.909 254 332 218.091 332 180C332 141.909 367.909 106 406 106C444.091 106 480 141.909 480 180Z" fill="#DC2626"/>
+  <circle cx="620" cy="120" r="50" fill="#F59E0B"/>
+  <path d="M590 120C590 139.673 605.327 155 625 155C644.673 155 660 139.673 660 120C660 100.327 644.673 85 625 85C605.327 85 590 100.327 590 120Z" fill="#FFFFFF"/>
+  <text x="70" y="120" font-family="sans-serif" font-size="40" font-weight="700" fill="#9A3412">Bali</text>
+  <text x="70" y="165" font-family="sans-serif" font-size="24" fill="#9A3412">culture & travel</text>
+</svg>

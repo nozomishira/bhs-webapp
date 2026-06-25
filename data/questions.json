@@ -1,0 +1,97 @@
+[
+  {
+    "id": "q1",
+    "type": "vocabulary",
+    "question": "「こんにちは」という意味のインドネシア語は？",
+    "options": ["Selamat pagi", "Halo", "Selamat malam", "Sampai jumpa"],
+    "correctAnswer": 1,
+    "explanation": "「Halo」は日常会話で一般的な挨拶です。「Selamat pagi」は朝の挨拶、「Selamat malam」は夜の挨拶です。",
+    "category": "greeting"
+  },
+  {
+    "id": "q2",
+    "type": "vocabulary",
+    "question": "「ありがとう」という意味のインドネシア語は？",
+    "options": ["Permisi", "Terima kasih", "Maaf", "Silakan"],
+    "correctAnswer": 1,
+    "explanation": "「Terima kasih」は「ありがとう」という意味の基本的な感謝の表現です。",
+    "category": "polite"
+  },
+  {
+    "id": "q3",
+    "type": "vocabulary",
+    "question": "「水」という意味のインドネシア語は？",
+    "options": ["Makanan", "Minum", "Air", "Makan"],
+    "correctAnswer": 2,
+    "explanation": "「Air」は「水」を意味します。「Minum」は「飲む」、「Makanan」は「食べ物」です。",
+    "category": "noun"
+  },
+  {
+    "id": "q4",
+    "type": "grammar",
+    "question": "正しいインドネシア語の文は？",
+    "options": ["Saya makan nasi.", "Makan saya nasi.", "Nasi makan saya.", "Makan nasi saya."],
+    "correctAnswer": 0,
+    "explanation": "インドネシア語の基本的な文法は主語(S)+動詞(V)+目的語(O)です。「Saya makan nasi」は「私はご飯を食べます」という意味です。",
+    "category": "sentence"
+  },
+  {
+    "id": "q5",
+    "type": "vocabulary",
+    "question": "「猫」という意味のインドネシア語は？",
+    "options": ["Anjing", "Kucing", "Burung", "Ikan"],
+    "correctAnswer": 1,
+    "explanation": "「Kucing」は「猫」を意味します。「Anjing」は「犬」、「Burung」は「鳥」、「Ikan」は「魚」です。",
+    "category": "noun"
+  },
+  {
+    "id": "q6",
+    "type": "vocabulary",
+    "question": "「美しい」という意味のインドネシア語は？",
+    "options": ["Cantik", "Besar", "Kecil", "Baik"],
+    "correctAnswer": 0,
+    "explanation": "「Cantik」は「美しい」または「かわいい」を意味します。特に女性に対して使う場合が多いです。",
+    "category": "adjective"
+  },
+  {
+    "id": "q7",
+    "type": "grammar",
+    "question": "「私の本」を表すインドネシア語は？",
+    "options": ["Saya buku", "Buku saya", "Buku ku", "Saya ku buku"],
+    "correctAnswer": 1,
+    "explanation": "インドネシア語では通常、所有物は名詞の後に来ます。「Buku saya」で「私の本」です。",
+    "category": "possession"
+  },
+  {
+    "id": "q8",
+    "type": "vocabulary",
+    "question": "「学生」という意味のインドネシア語は？",
+    "options": ["Guru", "Siswa", "Dokter", "Polisi"],
+    "correctAnswer": 1,
+    "explanation": "「Siswa」は「学生」を意味します。「Guru」は「先生」です。",
+    "category": "noun"
+  },
+  {
+    "id": "q9",
+    "type": "vocabulary",
+    "question": "「病院」という意味のインドネシア語は？",
+    "options": ["Rumah sakit", "Kantor", "Sekolah", "Toko"],
+    "correctAnswer": 0,
+    "explanation": "「Rumah sakit」は直訳で「病気の家」という意味で、「病院」を表します。",
+    "category": "place"
+  },
+  {
+    "id": "q10",
+    "type": "grammar",
+    "question": "次の文で正しいものは？",
+    "options": [
+      "Dia tidak suka ikan",
+      "Dia tidak ikan suka",
+      "Tidak dia suka ikan",
+      "Suka dia tidak ikan"
+    ],
+    "correctAnswer": 0,
+    "explanation": "インドネシア語の否定形は「tidak」を動詞の前に置きます。「Dia tidak suka ikan」は「彼/彼女は魚が好きではありません」という意味です。",
+    "category": "negation"
+  }
+]

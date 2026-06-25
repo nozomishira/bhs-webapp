@@ -1,0 +1,13 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="30" fill="#FFEDD5"/>
+  <path d="M0 320C120 280 240 360 360 320C480 280 600 360 720 320V480H0V320Z" fill="#F97316"/>
+  <path d="M0 260C120 220 240 300 360 260C480 220 600 300 720 260V320H0V260Z" fill="#FB923C"/>
+  <path d="M520 110C520 158.256 477.256 200 429 200C380.744 200 338 158.256 338 110C338 61.7438 380.744 20 429 20C477.256 20 520 61.7438 520 110Z" fill="#B91C1C"/>
+  <polygon points="210,420 260,220 340,420" fill="#7C2D12"/>
+  <path d="M290 420H360L330 260H290L260 420Z" fill="#F59E0B"/>
+  <path d="M340 424C340 424 380 388 415 312C450 236 490 240 490 240L462 410L340 424Z" fill="#EA580C"/>
+  <text x="80" y="120" font-family="sans-serif" font-size="44" font-weight="700" fill="#7C2D12">Indonesia</text>
+  <text x="80" y="170" font-family="sans-serif" font-size="28" fill="#7C2D12">language & culture</text>
+  <circle cx="640" cy="380" r="46" fill="#F59E0B"/>
+  <circle cx="640" cy="380" r="22" fill="#fff"/>
+</svg>
