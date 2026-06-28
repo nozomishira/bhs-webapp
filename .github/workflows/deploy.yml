@@ -1,0 +1,57 @@
+name: Deploy to S3
+
+# developブランチへのpush（マージ含む）をトリガーとする
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # OIDCを使うために必要なパーミッション
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      # 1. コードをチェックアウト
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Node.jsのセットアップ
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      # 3. 依存関係のインストール
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. ビルド
+      - name: Build
+        run: npm run build
+
+      # 5. AWSの認証（OIDCでアクセスキー不要）
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::459532536546:role/dev-apne1-github-actions-role
+          aws-region: ap-northeast-1
+
+      # 6. S3にアップロード
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./out/ s3://dev-apne1-bhs-indonesia-webapp/ \
+            --region ap-northeast-1 \
+            --delete
+
+      # 7. CloudFrontのキャッシュをクリア
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id EP8MG7JHRZAOQ \
+            --paths "/*"
