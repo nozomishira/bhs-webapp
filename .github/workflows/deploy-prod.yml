@@ -1,0 +1,92 @@
+# ===================================================
+# deploy-prod.yml
+#
+# prod環境用デプロイワークフロー（雛形）
+# まだprod環境のCFnスタック（prod-bhs-indonesia-webapp等）が
+# 存在しないため、全体をコメントアウトしている。
+#
+# prod環境構築後の有効化手順:
+#   1. bhs-infra側でprod用CFnスタックを作成
+#      （webapp/parameter-prod.json, cicd/parameter-prod.json を使用）
+#   2. 下記を非コメント化
+#   3. STACK_NAME / BUCKET_NAME をprod環境の値に置き換え（必要なら）
+#   4. role-to-assume のARNをprod用IAMロールARNに置き換え
+#      （prod-apne1-github-actions-role を想定）
+#   5. mainブランチへのpushで動作確認
+#      ※本番デプロイなので、必要に応じて environment: production の
+#        承認フロー（GitHub Environments）を追加することを推奨
+# ===================================================
+
+# name: Deploy to S3 (prod)
+#
+# on:
+#   push:
+#     branches:
+#       - main
+#
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     # environment: production  # 承認フローを設けたい場合はコメント解除
+#
+#     permissions:
+#       id-token: write
+#       contents: read
+#
+#     steps:
+#       # 1. コードをチェックアウト
+#       - name: Checkout
+#         uses: actions/checkout@v4.2.2
+#
+#       # 2. Node.jsのセットアップ
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v4.4.0
+#         with:
+#           node-version: '24'
+#           cache: 'npm'
+#
+#       # 3. 依存関係のインストール
+#       - name: Install dependencies
+#         run: npm ci
+#
+#       # 4. ビルド
+#       - name: Build
+#         run: npm run build
+#
+#       # 5. AWSの認証（OIDCでアクセスキー不要）
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4.1.0
+#         with:
+#           role-to-assume: arn:aws:iam::459532536546:role/prod-apne1-github-actions-role
+#           aws-region: ap-northeast-1
+#
+#       # 6. CFnスタックのOutputsからDistributionIdを動的取得
+#       - name: Get CloudFront Distribution ID
+#         id: cfn-outputs
+#         run: |
+#           DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+#             --stack-name prod-bhs-indonesia-webapp \
+#             --region ap-northeast-1 \
+#             --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" \
+#             --output text)
+#
+#           if [ -z "$DISTRIBUTION_ID" ] || [ "$DISTRIBUTION_ID" == "None" ]; then
+#             echo "::error::DistributionId not found in stack outputs."
+#             exit 1
+#           fi
+#
+#           echo "distribution_id=$DISTRIBUTION_ID" >> "$GITHUB_OUTPUT"
+#
+#       # 7. S3にアップロード
+#       - name: Deploy to S3
+#         run: |
+#           aws s3 sync ./out/ s3://prod-apne1-bhs-indonesia-webapp/ \
+#             --region ap-northeast-1 \
+#             --delete
+#
+#       # 8. CloudFrontのキャッシュをクリア
+#       - name: Invalidate CloudFront cache
+#         run: |
+#           aws cloudfront create-invalidation \
+#             --distribution-id ${{ steps.cfn-outputs.outputs.distribution_id }} \
+#             --paths "/*"

@@ -42,16 +42,36 @@ jobs:
           role-to-assume: arn:aws:iam::459532536546:role/dev-apne1-github-actions-role
           aws-region: ap-northeast-1
 
-      # 6. S3にアップロード
+      # 6. CFnスタックのOutputsからDistributionIdを動的取得
+      #    bhs-infra側（webapp.yml）でデプロイされたスタックの出力値を
+      #    AWS CLI経由で取得する。bhs-infraリポジトリのファイルを直接参照するわけではなく、
+      #    AWS上にデプロイ済みのCloudFormationスタックに問い合わせている。
+      - name: Get CloudFront Distribution ID
+        id: cfn-outputs
+        run: |
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            --stack-name dev-bhs-indonesia-webapp \
+            --region ap-northeast-1 \
+            --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" \
+            --output text)
+
+          if [ -z "$DISTRIBUTION_ID" ] || [ "$DISTRIBUTION_ID" == "None" ]; then
+            echo "::error::DistributionId not found in stack outputs. Check that webapp.yml has been deployed with the Outputs section."
+            exit 1
+          fi
+
+          echo "distribution_id=$DISTRIBUTION_ID" >> "$GITHUB_OUTPUT"
+
+      # 7. S3にアップロード
       - name: Deploy to S3
         run: |
           aws s3 sync ./out/ s3://dev-apne1-bhs-indonesia-webapp/ \
             --region ap-northeast-1 \
             --delete
 
-      # 7. CloudFrontのキャッシュをクリア
+      # 8. CloudFrontのキャッシュをクリア（取得したDistributionIdを使用）
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id E13C0CUACCVAH6  \
+            --distribution-id ${{ steps.cfn-outputs.outputs.distribution_id }} \
             --paths "/*"
