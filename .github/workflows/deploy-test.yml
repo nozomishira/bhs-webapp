@@ -1,18 +1,7 @@
 # ===================================================
 # deploy-test.yml
-#
 # test環境用デプロイワークフロー（雛形）
-# まだtest環境のCFnスタック（test-bhs-indonesia-webapp等）が
-# 存在しないため、全体をコメントアウトしている。
-#
-# test環境構築後の有効化手順:
-#   1. bhs-infra側でtest用CFnスタックを作成
-#      （webapp/parameter-test.json, cicd/parameter-test.json を使用）
-#   2. 下記を非コメント化
-#   3. STACK_NAME / BUCKET_NAME をtest環境の値に置き換え（必要なら）
-#   4. role-to-assume のARNをtest用IAMロールARNに置き換え
-#      （test-apne1-github-actions-role を想定）
-#   5. testブランチへのpushで動作確認
+# test環境のCFnスタック構築後に steps 内のコメントを外して有効化する
 # ===================================================
 
 name: Deploy to S3 (test)
@@ -20,70 +9,53 @@ name: Deploy to S3 (test)
 on:
   push:
     branches:
-      - test
+      - test  # testブランチへのpushのみ起動（developでは動かない）
 
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-#
-#     permissions:
-#       id-token: write
-#       contents: read
-#
-#     steps:
-#       # 1. コードをチェックアウト
-#       - name: Checkout
-#         uses: actions/checkout@v4.2.2
-#
-#       # 2. Node.jsのセットアップ
-#       - name: Setup Node.js
-#         uses: actions/setup-node@v4.4.0
-#         with:
-#           node-version: '24'
-#           cache: 'npm'
-#
-#       # 3. 依存関係のインストール
-#       - name: Install dependencies
-#         run: npm ci
-#
-#       # 4. ビルド
-#       - name: Build
-#         run: npm run build
-#
-#       # 5. AWSの認証（OIDCでアクセスキー不要）
-#       - name: Configure AWS credentials
-#         uses: aws-actions/configure-aws-credentials@v4.1.0
-#         with:
-#           role-to-assume: arn:aws:iam::459532536546:role/test-apne1-github-actions-role
-#           aws-region: ap-northeast-1
-#
-#       # 6. CFnスタックのOutputsからDistributionIdを動的取得
-#       - name: Get CloudFront Distribution ID
-#         id: cfn-outputs
-#         run: |
-#           DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
-#             --stack-name test-bhs-indonesia-webapp \
-#             --region ap-northeast-1 \
-#             --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" \
-#             --output text)
-#
-#           if [ -z "$DISTRIBUTION_ID" ] || [ "$DISTRIBUTION_ID" == "None" ]; then
-#             echo "::error::DistributionId not found in stack outputs."
-#             exit 1
-#           fi
-#
-#           echo "distribution_id=$DISTRIBUTION_ID" >> "$GITHUB_OUTPUT"
-#
-#       # 7. S3にアップロード
-#       - name: Deploy to S3
-#         run: |
-#           aws s3 sync ./out/ s3://test-apne1-bhs-indonesia-webapp/ \
-#             --region ap-northeast-1 \
-#             --delete
-#
-#       # 8. CloudFrontのキャッシュをクリア
-#       - name: Invalidate CloudFront cache
-#         run: |
-#           aws cloudfront create-invalidation \
-#             --distribution-id ${{ steps.cfn-outputs.outputs.distribution_id }} \
-#             --paths "/*"
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # test環境未構築のため全ステップをスキップする
+    if: false
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4.4.0
+        with:
+          node-version: '24'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          role-to-assume: arn:aws:iam::459532536546:role/test-apne1-github-actions-role
+          aws-region: ap-northeast-1
+      - name: Get CloudFront Distribution ID
+        id: cfn-outputs
+        run: |
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            --stack-name test-bhs-indonesia-webapp \
+            --region ap-northeast-1 \
+            --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" \
+            --output text)
+          if [ -z "$DISTRIBUTION_ID" ] || [ "$DISTRIBUTION_ID" == "None" ]; then
+            echo "::error::DistributionId not found in stack outputs."
+            exit 1
+          fi
+          echo "distribution_id=$DISTRIBUTION_ID" >> "$GITHUB_OUTPUT"
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./out/ s3://test-apne1-bhs-indonesia-webapp/ \
+            --region ap-northeast-1 \
+            --delete
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ steps.cfn-outputs.outputs.distribution_id }} \
+            --paths "/*"
