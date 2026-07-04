@@ -15,13 +15,13 @@
 #   5. testブランチへのpushで動作確認
 # ===================================================
 
-# name: Deploy to S3 (test)
-#
-# on:
-#   push:
-#     branches:
-#       - test
-#
+name: Deploy to S3 (test)
+
+on:
+  push:
+    branches:
+      - test
+
 # jobs:
 #   deploy:
 #     runs-on: ubuntu-latest

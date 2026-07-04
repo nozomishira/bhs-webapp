@@ -17,13 +17,13 @@
 #        承認フロー（GitHub Environments）を追加することを推奨
 # ===================================================
 
-# name: Deploy to S3 (prod)
-#
-# on:
-#   push:
-#     branches:
-#       - main
-#
+name: Deploy to S3 (prod)
+
+on:
+  push:
+    branches:
+      - main
+
 # jobs:
 #   deploy:
 #     runs-on: ubuntu-latest
