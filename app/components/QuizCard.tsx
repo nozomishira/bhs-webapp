@@ -1,9 +1,9 @@
 'use client';
 
-import { Question } from '@/types/question';
+import { ApiQuestion } from '@/types/question';
 
 interface QuizCardProps {
-  question: Question;
+  question: ApiQuestion;
   selectedAnswer: number | null;
   answered: boolean;
   onSelectAnswer: (index: number) => void;
