@@ -1,6 +1,5 @@
-name: Deploy to S3
+name: Deploy to S3 (dev)
 
-# developブランチへのpush（マージ含む）をトリガーとする
 on:
   push:
     branches:
@@ -10,42 +9,46 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # OIDCを使うために必要なパーミッション
     permissions:
       id-token: write
       contents: read
 
     steps:
-      # 1. コードをチェックアウト
       - name: Checkout
         uses: actions/checkout@v4.2.2
 
-      # 2. Node.jsのセットアップ
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '24'
           cache: 'npm'
 
-      # 3. 依存関係のインストール
       - name: Install dependencies
         run: npm ci
 
-      # 4. ビルド
-      - name: Build
-        run: npm run build
-
-      # 5. AWSの認証（OIDCでアクセスキー不要）
+      # AWS認証を先に行う（API URL取得のため）
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::459532536546:role/dev-apne1-github-actions-webapp-role
           aws-region: ap-northeast-1
 
-      # 6. CFnスタックのOutputsからDistributionIdを動的取得
-      #    bhs-infra側（webapp.yml）でデプロイされたスタックの出力値を
-      #    AWS CLI経由で取得する。bhs-infraリポジトリのファイルを直接参照するわけではなく、
-      #    AWS上にデプロイ済みのCloudFormationスタックに問い合わせている。
+      # API URL を CFn から動的取得して .env.production を生成
+      - name: Generate .env.production
+        run: |
+          API_URL=$(aws cloudformation describe-stacks \
+            --stack-name dev-bhs-indonesia-webapi \
+            --region ap-northeast-1 \
+            --query "Stacks[0].Outputs[?OutputKey=='ApiEndpoint'].OutputValue" \
+            --output text)
+
+          echo "NEXT_PUBLIC_API_BASE_URL=$API_URL" > .env.production
+          echo "Generated .env.production with API_URL=$API_URL"
+
+      # API URL が埋め込まれた状態でビルド
+      - name: Build
+        run: npm run build
+
       - name: Get CloudFront Distribution ID
         id: cfn-outputs
         run: |
@@ -56,20 +59,18 @@ jobs:
             --output text)
 
           if [ -z "$DISTRIBUTION_ID" ] || [ "$DISTRIBUTION_ID" == "None" ]; then
-            echo "::error::DistributionId not found in stack outputs. Check that webapp.yml has been deployed with the Outputs section."
+            echo "::error::DistributionId not found in stack outputs."
             exit 1
           fi
 
           echo "distribution_id=$DISTRIBUTION_ID" >> "$GITHUB_OUTPUT"
 
-      # 7. S3にアップロード
       - name: Deploy to S3
         run: |
           aws s3 sync ./out/ s3://dev-apne1-bhs-indonesia-webapp/ \
             --region ap-northeast-1 \
             --delete
 
-      # 8. CloudFrontのキャッシュをクリア（取得したDistributionIdを使用）
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
