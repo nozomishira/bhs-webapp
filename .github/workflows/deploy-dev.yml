@@ -22,7 +22,7 @@ jobs:
 
       # 2. Node.jsのセットアップ
       - name: Setup Node.js
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           cache: 'npm'
@@ -37,7 +37,7 @@ jobs:
 
       # 5. AWSの認証（OIDCでアクセスキー不要）
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4.1.0
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::459532536546:role/dev-apne1-github-actions-role
           aws-region: ap-northeast-1
