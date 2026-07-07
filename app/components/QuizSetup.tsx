@@ -42,7 +42,10 @@ export default function QuizSetup({ courseType, onStart }: QuizSetupProps) {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchLevels();
+        const typeFilter = courseType === 'vocabulary' ? 'vocabulary'
+          : courseType === 'grammar' ? 'grammar'
+          : undefined;
+        const data = await fetchLevels(typeFilter);
         setLevels(data.levels);
         if (data.levels.length > 0) {
           setSelectedLevel(data.levels[0].level);

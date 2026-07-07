@@ -31,8 +31,9 @@ async function apiFetch<T>(path: string): Promise<T> {
 // --------------------------------------------------------
 // GET /levels
 // --------------------------------------------------------
-export async function fetchLevels(): Promise<{ levels: LevelInfo[]; maxLevel: number }> {
-  return apiFetch('/levels');
+export async function fetchLevels(type?: 'vocabulary' | 'grammar'): Promise<{ levels: LevelInfo[]; maxLevel: number }> {
+  const qs = type ? `?type=${type}` : '';
+  return apiFetch(`/levels${qs}`);
 }
 
 // --------------------------------------------------------
