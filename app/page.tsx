@@ -14,21 +14,12 @@ export default function Home() {
 
   const courses = [
     {
-      id: 'vocabulary',
-      title: '単語',
+      id: 'quiz',
+      title: 'クイズ',
       icon: '📚',
-      description: 'インドネシア語の基本的な単語を学習します',
-      color: 'from-orange-400 to-orange-600',
+      description: 'レベル・問題数・タイプを選んで単語や文法を学習します',
+      color: 'from-orange-400 to-red-600',
       href: '/quiz/vocabulary',
-      external: false,
-    },
-    {
-      id: 'grammar',
-      title: '文法',
-      icon: '✍️',
-      description: 'インドネシア語の文法規則を理解します',
-      color: 'from-red-400 to-red-600',
-      href: '/quiz/grammar',
       external: false,
     },
     {
@@ -94,7 +85,7 @@ export default function Home() {
 
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/quiz/vocabulary" className="inline-flex items-center justify-center rounded-full bg-red-600 px-8 py-4 text-white font-semibold shadow-xl shadow-red-200/40 transition hover:bg-red-700">
-                まずは単語から
+                クイズに挑戦
               </Link>
               <Link href="/blog" className="inline-flex items-center justify-center rounded-full border border-red-300 bg-white px-8 py-4 text-red-700 font-semibold shadow-sm transition hover:bg-red-50">
                 コラムを見る

@@ -10,8 +10,7 @@ export default function Navigation() {
 
   const navItems = [
     { path: '/', label: 'ホーム' },
-    { path: '/quiz/vocabulary', label: '単語' },
-    { path: '/quiz/grammar', label: '文法' },
+    { path: '/quiz/vocabulary', label: 'クイズ' },
     { path: '/quiz/reading', label: '長文' },
     { path: '/quiz/exam', label: '検定' },
     { path: '/blog', label: 'ブログ' },
