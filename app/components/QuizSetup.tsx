@@ -175,8 +175,8 @@ export default function QuizSetup({ courseType, onStart }: QuizSetupProps) {
           </div>
         </div>
 
-        {/* タイプ選択（exam / reading 以外で表示） */}
-        {(courseType === 'vocabulary' || courseType === 'grammar' || courseType === 'exam') && (
+        {/* タイプ選択（exam のみ表示。vocabulary/grammar は強制されるため非表示） */}
+        {courseType === 'exam' && (
           <div className="mb-8">
             <label className="block text-sm font-bold text-gray-700 mb-3">
               問題タイプ
