@@ -84,3 +84,50 @@ export async function saveSession(params: SaveSessionParams): Promise<{ sessionI
   const json = await res.json();
   return json.data ?? json;
 }
+
+// --------------------------------------------------------
+// Chat API
+// --------------------------------------------------------
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface ChatScenario {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export async function fetchChatScenarios(): Promise<{ scenarios: ChatScenario[] }> {
+  return apiFetch('/chat/scenarios');
+}
+
+export interface PostChatParams {
+  scenarioId: string;
+  messages: ChatMessage[];
+}
+
+export interface ChatResponse {
+  reply: string;
+  scenarioId: string;
+  usage: { inputTokens: number; outputTokens: number };
+}
+
+export async function postChat(params: PostChatParams): Promise<ChatResponse> {
+  const url = `${API_BASE}/chat`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    throw new Error(`Chat API error ${res.status}: ${errorBody}`);
+  }
+
+  const json = await res.json();
+  return (json.data ?? json) as ChatResponse;
+}

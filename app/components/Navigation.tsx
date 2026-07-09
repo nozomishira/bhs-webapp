@@ -12,6 +12,7 @@ export default function Navigation() {
     { path: '/', label: 'ホーム' },
     { path: '/quiz/vocabulary', label: '単語' },
     { path: '/quiz/grammar', label: '文法' },
+    { path: '/chat', label: '会話' },
     { path: '/quiz/reading', label: '長文' },
     { path: '/quiz/exam', label: '検定' },
     { path: '/blog', label: 'ブログ' },

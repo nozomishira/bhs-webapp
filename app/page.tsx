@@ -59,6 +59,15 @@ export default function Home() {
       external: false,
     },
     {
+      id: 'chat',
+      title: 'AI会話練習',
+      icon: '💬',
+      description: '場面別にAIとインドネシア語で会話練習します',
+      color: 'from-teal-400 to-teal-600',
+      href: '/chat',
+      external: false,
+    },
+    {
       id: 'blog',
       title: 'インドネシアブログ',
       icon: '✈️',
