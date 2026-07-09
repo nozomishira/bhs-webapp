@@ -131,3 +131,46 @@ export async function postChat(params: PostChatParams): Promise<ChatResponse> {
   const json = await res.json();
   return (json.data ?? json) as ChatResponse;
 }
+
+// --------------------------------------------------------
+// POST /chat/evaluate - 採点
+// --------------------------------------------------------
+
+export interface EvaluationCategory {
+  score: number;
+  comment: string;
+}
+
+export interface ChatEvaluation {
+  totalScore: number;
+  grammar: EvaluationCategory;
+  spelling: EvaluationCategory;
+  vocabulary: EvaluationCategory;
+  communication: EvaluationCategory;
+  naturalness: EvaluationCategory;
+  goodPoints: string[];
+  improvements: string[];
+}
+
+export interface EvaluateResponse {
+  evaluation: ChatEvaluation;
+  scenarioId: string;
+  messageCount: number;
+}
+
+export async function evaluateChat(params: PostChatParams): Promise<EvaluateResponse> {
+  const url = `${API_BASE}/chat/evaluate`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    throw new Error(`Evaluate API error ${res.status}: ${errorBody}`);
+  }
+
+  const json = await res.json();
+  return (json.data ?? json) as EvaluateResponse;
+}

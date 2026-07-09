@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { postChat, ChatMessage } from '@/lib/api';
+import { postChat, evaluateChat, ChatMessage, ChatEvaluation } from '@/lib/api';
+import ChatEvaluationModal from './ChatEvaluationModal';
 
 interface ChatWindowProps {
   scenarioId: string;
@@ -21,6 +22,8 @@ export default function ChatWindow({ scenarioId, onBack }: ChatWindowProps) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [evaluating, setEvaluating] = useState(false);
+  const [evaluation, setEvaluation] = useState<ChatEvaluation | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -87,6 +90,35 @@ export default function ChatWindow({ scenarioId, onBack }: ChatWindowProps) {
     }
   };
 
+  const handleEvaluate = async () => {
+    if (messages.length < 2 || evaluating) return;
+    setEvaluating(true);
+    setError(null);
+
+    try {
+      const res = await evaluateChat({ scenarioId, messages });
+      setEvaluation(res.evaluation);
+
+      // localStorage に保存
+      const history = JSON.parse(localStorage.getItem('bhs_chat_history') ?? '[]');
+      history.unshift({
+        id: Date.now().toString(),
+        scenarioId,
+        scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
+        messages,
+        evaluation: res.evaluation,
+        createdAt: new Date().toISOString(),
+      });
+      // 最新20件のみ保持
+      localStorage.setItem('bhs_chat_history', JSON.stringify(history.slice(0, 20)));
+    } catch (e) {
+      console.error(e);
+      setError('採点に失敗しました。もう一度お試しください。');
+    } finally {
+      setEvaluating(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
       {/* ヘッダー */}
@@ -98,12 +130,19 @@ export default function ChatWindow({ scenarioId, onBack }: ChatWindowProps) {
         >
           ← 
         </button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-lg font-bold text-slate-900">
             {SCENARIO_NAMES[scenarioId] ?? 'チャット'}
           </h1>
           <p className="text-xs text-gray-400">AI会話練習</p>
         </div>
+        <button
+          onClick={handleEvaluate}
+          disabled={messages.length < 2 || evaluating || loading}
+          className="px-4 py-2 bg-orange-500 text-white text-sm font-bold rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          {evaluating ? '採点中...' : '採点する'}
+        </button>
       </div>
 
       {/* メッセージエリア */}
@@ -168,6 +207,14 @@ export default function ChatWindow({ scenarioId, onBack }: ChatWindowProps) {
           </button>
         </div>
       </div>
+
+      {/* 採点結果モーダル */}
+      {evaluation && (
+        <ChatEvaluationModal
+          evaluation={evaluation}
+          onClose={() => setEvaluation(null)}
+        />
+      )}
     </div>
   );
 }
