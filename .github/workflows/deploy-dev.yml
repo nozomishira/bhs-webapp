@@ -61,12 +61,12 @@ jobs:
             --output text)
 
           cat > .env.production << EOF
-          NEXT_PUBLIC_API_BASE_URL=$API_URL
-          NEXT_PUBLIC_COGNITO_DOMAIN=$COGNITO_DOMAIN
-          NEXT_PUBLIC_COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID
-          NEXT_PUBLIC_AUTH_REDIRECT_URI=https://$CF_DOMAIN/auth/callback
-          NEXT_PUBLIC_AUTH_LOGOUT_URI=https://$CF_DOMAIN
-          EOF
+NEXT_PUBLIC_API_BASE_URL=$API_URL
+NEXT_PUBLIC_COGNITO_DOMAIN=$COGNITO_DOMAIN
+NEXT_PUBLIC_COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID
+NEXT_PUBLIC_AUTH_REDIRECT_URI=https://$CF_DOMAIN/auth/callback
+NEXT_PUBLIC_AUTH_LOGOUT_URI=https://$CF_DOMAIN
+EOF
 
           echo "Generated .env.production"
           cat .env.production
