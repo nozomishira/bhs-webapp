@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { fetchProfile, updateProfile, UserProfile } from '@/lib/api';
-import { isAuthenticated } from '@/lib/auth';
 
 const GENDER_OPTIONS = [
   { value: 'unspecified', label: '未設定' },
@@ -24,24 +23,21 @@ export default function ProfilePage() {
   const [bio, setBio] = useState('');
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      setError('ログインが必要です');
-      setLoading(false);
-      return;
-    }
-
-    fetchProfile()
-      .then((p) => {
+    const load = async () => {
+      try {
+        const p = await fetchProfile();
         setProfile(p);
         setDisplayName(p.displayName);
         setGender(p.gender);
         setBio(p.bio);
-      })
-      .catch((e) => {
+      } catch (e) {
         console.error(e);
-        setError('プロフィールの取得に失敗しました');
-      })
-      .finally(() => setLoading(false));
+        setError('プロフィールの取得に失敗しました。ログインしてください。');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
   const handleSave = async () => {

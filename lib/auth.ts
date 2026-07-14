@@ -39,10 +39,12 @@ function base64urlEncode(buffer: ArrayBuffer): string {
 // ログイン
 // --------------------------------------------------------
 export async function login(): Promise<void> {
+  // 古い PKCE 情報をクリア
+  sessionStorage.removeItem('pkce_code_verifier');
+
   const codeVerifier = generateRandomString(64);
   const codeChallenge = base64urlEncode(await sha256(codeVerifier));
 
-  // PKCE code_verifier を sessionStorage に保存（コールバックで使う）
   sessionStorage.setItem('pkce_code_verifier', codeVerifier);
 
   const params = new URLSearchParams({
@@ -187,6 +189,7 @@ export function isAuthenticated(): boolean {
 /** ログアウト */
 export function logout(): void {
   clearTokens();
+  // Cognito の Hosted UI セッションもクリアする
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     logout_uri: LOGOUT_URI,
