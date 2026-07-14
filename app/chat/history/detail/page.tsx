@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { fetchChatHistoryDetail, ChatHistoryDetail } from '@/lib/api';
 import ChatEvaluationModal from '@/app/components/ChatEvaluationModal';
 
-export default function ChatHistoryDetailPage() {
+function HistoryDetailContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('id');
   const [detail, setDetail] = useState<ChatHistoryDetail | null>(null);
@@ -45,7 +45,6 @@ export default function ChatHistoryDetailPage() {
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
-      {/* ヘッダー */}
       <div className="flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200 shadow-sm">
         <Link href="/chat/history" className="text-gray-500 hover:text-red-600 font-bold text-lg">
           ←
@@ -66,7 +65,6 @@ export default function ChatHistoryDetailPage() {
         )}
       </div>
 
-      {/* メッセージ */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {detail.messages.map((msg, idx) => (
           <div
@@ -86,7 +84,6 @@ export default function ChatHistoryDetailPage() {
         ))}
       </div>
 
-      {/* 採点モーダル */}
       {showEval && detail.evaluation && (
         <ChatEvaluationModal
           evaluation={detail.evaluation}
@@ -94,5 +91,17 @@ export default function ChatHistoryDetailPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function ChatHistoryDetailPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500" />
+      </div>
+    }>
+      <HistoryDetailContent />
+    </Suspense>
   );
 }
