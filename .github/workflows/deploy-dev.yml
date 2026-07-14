@@ -63,7 +63,7 @@ jobs:
           echo "NEXT_PUBLIC_API_BASE_URL=$API_URL" > .env.production
           echo "NEXT_PUBLIC_COGNITO_DOMAIN=$COGNITO_DOMAIN" >> .env.production
           echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$COGNITO_CLIENT_ID" >> .env.production
-          echo "NEXT_PUBLIC_AUTH_REDIRECT_URI=https://$CF_DOMAIN/auth/callback" >> .env.production
+          echo "NEXT_PUBLIC_AUTH_REDIRECT_URI=https://$CF_DOMAIN/auth/callback.html" >> .env.production
           echo "NEXT_PUBLIC_AUTH_LOGOUT_URI=https://$CF_DOMAIN" >> .env.production
 
           echo "Generated .env.production:"
