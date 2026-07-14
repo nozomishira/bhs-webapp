@@ -65,9 +65,9 @@ export default function Navigation() {
             {/* ログイン/ログアウト */}
             {loggedIn ? (
               <div className="flex items-center gap-2 ml-3">
-                <span className="text-white/90 text-sm font-medium">
+                <a href="/profile" className="text-white/90 text-sm font-medium hover:underline">
                   {userName ?? 'ユーザー'}
-                </span>
+                </a>
                 <button
                   onClick={logout}
                   className="px-3 py-1.5 rounded-lg text-xs font-medium text-white/70 border border-white/30 hover:bg-white/20 transition-all"

@@ -258,3 +258,46 @@ export async function saveChatHistory(params: SaveChatHistoryParams): Promise<{ 
   const json = await res.json();
   return (json.data ?? json) as { sessionId: string };
 }
+
+// --------------------------------------------------------
+// Profile API
+// --------------------------------------------------------
+
+export interface UserProfile {
+  userId: string;
+  email: string;
+  displayName: string;
+  gender: string;
+  bio: string;
+  createdAt: string;
+}
+
+export async function fetchProfile(): Promise<UserProfile> {
+  return apiFetch('/profile');
+}
+
+export interface UpdateProfileParams {
+  displayName?: string;
+  gender?: string;
+  bio?: string;
+}
+
+export async function updateProfile(params: UpdateProfileParams): Promise<UserProfile> {
+  const url = `${API_BASE}/profile`;
+  const token = await getAccessToken();
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(params),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Update profile failed: ${res.status}`);
+  }
+
+  const json = await res.json();
+  return (json.data ?? json) as UserProfile;
+}
