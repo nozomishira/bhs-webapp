@@ -95,9 +95,9 @@ export default function ProfilePage() {
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              maxLength={30}
+              maxLength={15}
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-400 focus:outline-none text-sm"
-              placeholder="表示名を入力（30文字以内）"
+              placeholder="表示名を入力（15文字以内）"
             />
           </div>
 

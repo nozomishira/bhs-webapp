@@ -2,11 +2,10 @@
 
 import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { handleCallback } from '@/lib/auth';
 
 function CallbackHandler() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
 
@@ -19,12 +18,13 @@ function CallbackHandler() {
 
     handleCallback(code).then((success) => {
       if (success) {
-        router.replace('/');
+        // フルリロードで localStorage からトークンを読み込ませる
+        window.location.href = '/';
       } else {
         setError('ログインに失敗しました。もう一度お試しください。');
       }
     });
-  }, [searchParams, router]);
+  }, [searchParams]);
 
   if (error) {
     return (

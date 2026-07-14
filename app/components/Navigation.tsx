@@ -78,7 +78,7 @@ export default function Navigation() {
                   href="/profile"
                   className="px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-all"
                 >
-                  {userName ?? 'マイページ'}
+                  プロフィール
                 </Link>
                 <button
                   onClick={logout}
