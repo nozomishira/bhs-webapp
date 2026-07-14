@@ -64,13 +64,17 @@ export default function Navigation() {
             ))}
             {/* ログイン/ログアウト */}
             {loggedIn ? (
-              <button
-                onClick={logout}
-                className="ml-3 px-4 py-2 rounded-lg font-medium text-white/80 hover:bg-white/20 transition-all text-sm"
-                title={userName ?? ''}
-              >
-                {userName ? `${userName.split(' ')[0]}` : 'ログアウト'}
-              </button>
+              <div className="flex items-center gap-2 ml-3">
+                <span className="text-white/90 text-sm font-medium">
+                  {userName ?? 'ユーザー'}
+                </span>
+                <button
+                  onClick={logout}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-white/70 border border-white/30 hover:bg-white/20 transition-all"
+                >
+                  ログアウト
+                </button>
+              </div>
             ) : (
               <button
                 onClick={login}
