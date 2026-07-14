@@ -2,9 +2,23 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { login, logout, isAuthenticated, getUserInfo, initAuth } from '@/lib/auth';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    initAuth().then((authenticated) => {
+      setLoggedIn(authenticated);
+      if (authenticated) {
+        const user = getUserInfo();
+        setUserName(user?.name ?? user?.email ?? null);
+      }
+    });
+  }, []);
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
 
@@ -13,6 +27,7 @@ export default function Navigation() {
     { path: '/quiz/vocabulary', label: '単語' },
     { path: '/quiz/grammar', label: '文法' },
     { path: '/chat', label: '会話' },
+    { path: '/chat/history', label: '履歴' },
     { path: '/quiz/reading', label: '長文' },
     { path: '/quiz/exam', label: '検定' },
     { path: '/blog', label: 'ブログ' },
@@ -20,7 +35,6 @@ export default function Navigation() {
 
   return (
     <nav className="bg-gradient-to-r from-red-600 to-red-700 shadow-lg relative overflow-hidden">
-      {/* バティック風背景パターン */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
           backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 1px, transparent 1px)',
@@ -34,7 +48,7 @@ export default function Navigation() {
             <span className="text-3xl transform group-hover:scale-110 transition-transform">🇮🇩</span>
             <span className="text-xl font-bold text-white">インドネシア語検定</span>
           </Link>
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -48,6 +62,23 @@ export default function Navigation() {
                 {item.label}
               </Link>
             ))}
+            {/* ログイン/ログアウト */}
+            {loggedIn ? (
+              <button
+                onClick={logout}
+                className="ml-3 px-4 py-2 rounded-lg font-medium text-white/80 hover:bg-white/20 transition-all text-sm"
+                title={userName ?? ''}
+              >
+                {userName ? `${userName.split(' ')[0]}` : 'ログアウト'}
+              </button>
+            ) : (
+              <button
+                onClick={login}
+                className="ml-3 px-4 py-2 rounded-lg font-medium bg-white text-red-700 shadow-md hover:bg-red-50 transition-all text-sm"
+              >
+                ログイン
+              </button>
+            )}
           </div>
         </div>
       </div>

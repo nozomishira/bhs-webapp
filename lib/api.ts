@@ -5,6 +5,7 @@
  * NEXT_PUBLIC_API_BASE_URL が未設定の場合はローカルの mock データにフォールバック。
  */
 import { ApiQuestion, LevelInfo } from '@/types/question';
+import { getAccessToken } from '@/lib/auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
 
@@ -13,18 +14,31 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
 // --------------------------------------------------------
 async function apiFetch<T>(path: string): Promise<T> {
   const url = `${API_BASE}${path}`;
+  const token = await getAccessToken();
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-    // 静的サイトなので cache: 'no-store' でフレッシュなデータを取得
+    headers,
     cache: 'no-store',
   });
+
+  if (res.status === 401) {
+    // トークン無効 → ログインページへ
+    window.location.href = '/';
+    throw new Error('Unauthorized');
+  }
 
   if (!res.ok) {
     throw new Error(`API error ${res.status}: ${url}`);
   }
 
   const json = await res.json();
-  // API は { success: true, data: ... } の形式
   return (json.data ?? json) as T;
 }
 
@@ -69,9 +83,13 @@ export interface SaveSessionParams {
 
 export async function saveSession(params: SaveSessionParams): Promise<{ sessionId: string }> {
   const url = `${API_BASE}/sessions`;
+  const token = await getAccessToken();
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify(params),
   });
 
@@ -117,9 +135,13 @@ export interface ChatResponse {
 
 export async function postChat(params: PostChatParams): Promise<ChatResponse> {
   const url = `${API_BASE}/chat`;
+  const token = await getAccessToken();
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify(params),
   });
 
@@ -160,9 +182,13 @@ export interface EvaluateResponse {
 
 export async function evaluateChat(params: PostChatParams): Promise<EvaluateResponse> {
   const url = `${API_BASE}/chat/evaluate`;
+  const token = await getAccessToken();
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify(params),
   });
 
@@ -173,4 +199,62 @@ export async function evaluateChat(params: PostChatParams): Promise<EvaluateResp
 
   const json = await res.json();
   return (json.data ?? json) as EvaluateResponse;
+}
+
+// --------------------------------------------------------
+// Chat History API
+// --------------------------------------------------------
+
+export interface ChatHistoryItem {
+  sessionId: string;
+  scenarioId: string;
+  scenarioName: string;
+  messageCount: number;
+  score: number | null;
+  createdAt: string;
+}
+
+export async function fetchChatHistory(): Promise<{ sessions: ChatHistoryItem[] }> {
+  return apiFetch('/chat/history');
+}
+
+export interface ChatHistoryDetail {
+  sessionId: string;
+  scenarioId: string;
+  scenarioName: string;
+  messages: ChatMessage[];
+  evaluation: ChatEvaluation | null;
+  createdAt: string;
+}
+
+export async function fetchChatHistoryDetail(sessionId: string): Promise<ChatHistoryDetail> {
+  return apiFetch(`/chat/history/${sessionId}`);
+}
+
+export interface SaveChatHistoryParams {
+  scenarioId: string;
+  scenarioName: string;
+  messages: ChatMessage[];
+  evaluation?: ChatEvaluation;
+}
+
+export async function saveChatHistory(params: SaveChatHistoryParams): Promise<{ sessionId: string }> {
+  const url = `${API_BASE}/chat/history`;
+  const token = await getAccessToken();
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(params),
+  });
+
+  if (!res.ok) {
+    console.warn(`saveChatHistory failed: ${res.status}`);
+    return { sessionId: '' };
+  }
+
+  const json = await res.json();
+  return (json.data ?? json) as { sessionId: string };
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { postChat, evaluateChat, ChatMessage, ChatEvaluation } from '@/lib/api';
+import { postChat, evaluateChat, saveChatHistory, ChatMessage, ChatEvaluation } from '@/lib/api';
 import ChatEvaluationModal from './ChatEvaluationModal';
 
 interface ChatWindowProps {
@@ -99,7 +99,15 @@ export default function ChatWindow({ scenarioId, onBack }: ChatWindowProps) {
       const res = await evaluateChat({ scenarioId, messages });
       setEvaluation(res.evaluation);
 
-      // localStorage に保存
+      // DynamoDB に会話履歴 + 採点結果を保存
+      saveChatHistory({
+        scenarioId,
+        scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
+        messages,
+        evaluation: res.evaluation,
+      }).catch((e) => console.warn('saveChatHistory failed:', e));
+
+      // localStorage にも保存（オフライン用）
       const history = JSON.parse(localStorage.getItem('bhs_chat_history') ?? '[]');
       history.unshift({
         id: Date.now().toString(),
