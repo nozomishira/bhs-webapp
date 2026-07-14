@@ -11,11 +11,20 @@ export default function Navigation() {
   const [userName, setUserName] = useState<string | null>(null);
 
   useEffect(() => {
-    initAuth().then((authenticated) => {
-      setLoggedIn(authenticated);
-      if (authenticated) {
+    // まず同期的にチェック（localStorage から即座に判定）
+    const authenticated = isAuthenticated();
+    setLoggedIn(authenticated);
+    if (authenticated) {
+      const user = getUserInfo();
+      setUserName(user?.name ?? user?.email?.split('@')[0] ?? null);
+    }
+
+    // 非同期でトークンの有効性を確認（バックグラウンド）
+    initAuth().then((valid) => {
+      setLoggedIn(valid);
+      if (valid) {
         const user = getUserInfo();
-        setUserName(user?.name ?? user?.email ?? null);
+        setUserName(user?.name ?? user?.email?.split('@')[0] ?? null);
       }
     });
   }, []);
@@ -65,9 +74,12 @@ export default function Navigation() {
             {/* ログイン/ログアウト */}
             {loggedIn ? (
               <div className="flex items-center gap-2 ml-3">
-                <a href="/profile" className="text-white/90 text-sm font-medium hover:underline">
-                  {userName ?? 'ユーザー'}
-                </a>
+                <Link
+                  href="/profile"
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-all"
+                >
+                  {userName ?? 'マイページ'}
+                </Link>
                 <button
                   onClick={logout}
                   className="px-3 py-1.5 rounded-lg text-xs font-medium text-white/70 border border-white/30 hover:bg-white/20 transition-all"

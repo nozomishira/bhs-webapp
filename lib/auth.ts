@@ -139,7 +139,10 @@ function setTokens(access: string, id: string, refresh: string | null, expiresIn
   refreshToken = refresh ?? refreshToken;
   tokenExpiry = Date.now() + expiresIn * 1000;
 
-  // リフレッシュトークンのみ localStorage に保存（セッション跨ぎ用）
+  // localStorage に保存（ページ遷移でメモリが消えるため）
+  localStorage.setItem('bhs_access_token', access);
+  localStorage.setItem('bhs_id_token', id);
+  localStorage.setItem('bhs_token_expiry', String(tokenExpiry));
   if (refresh) {
     localStorage.setItem('bhs_refresh_token', refresh);
   }
@@ -150,7 +153,10 @@ function clearTokens(): void {
   idToken = null;
   refreshToken = null;
   tokenExpiry = 0;
+  localStorage.removeItem('bhs_access_token');
+  localStorage.removeItem('bhs_id_token');
   localStorage.removeItem('bhs_refresh_token');
+  localStorage.removeItem('bhs_token_expiry');
 }
 
 // --------------------------------------------------------
@@ -159,21 +165,28 @@ function clearTokens(): void {
 
 /** 有効なアクセストークンを取得。期限切れならリフレッシュを試みる */
 export async function getAccessToken(): Promise<string | null> {
+  // メモリになければ localStorage から復元
+  if (!accessToken) {
+    const stored = localStorage.getItem('bhs_access_token');
+    const storedExpiry = localStorage.getItem('bhs_token_expiry');
+    if (stored && storedExpiry) {
+      accessToken = stored;
+      idToken = localStorage.getItem('bhs_id_token');
+      refreshToken = localStorage.getItem('bhs_refresh_token');
+      tokenExpiry = Number(storedExpiry);
+    }
+  }
+
   // トークンが有効期限内ならそのまま返す
   if (accessToken && Date.now() < tokenExpiry - 60000) {
     return accessToken;
   }
 
   // リフレッシュを試みる
-  if (refreshToken) {
-    const success = await refreshAccessToken();
-    if (success) return accessToken;
+  if (!refreshToken) {
+    refreshToken = localStorage.getItem('bhs_refresh_token');
   }
-
-  // localStorage にリフレッシュトークンがあればリストア
-  const stored = localStorage.getItem('bhs_refresh_token');
-  if (stored && !refreshToken) {
-    refreshToken = stored;
+  if (refreshToken) {
     const success = await refreshAccessToken();
     if (success) return accessToken;
   }
@@ -181,15 +194,15 @@ export async function getAccessToken(): Promise<string | null> {
   return null;
 }
 
-/** ログイン済みかどうか */
+/** ログイン済みかどうか（同期的に判定） */
 export function isAuthenticated(): boolean {
-  return !!(accessToken || localStorage.getItem('bhs_refresh_token'));
+  if (accessToken) return true;
+  return !!(localStorage.getItem('bhs_access_token') || localStorage.getItem('bhs_refresh_token'));
 }
 
 /** ログアウト */
 export function logout(): void {
   clearTokens();
-  // Cognito の Hosted UI セッションもクリアする
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     logout_uri: LOGOUT_URI,
@@ -199,9 +212,10 @@ export function logout(): void {
 
 /** ID トークンからユーザー情報を取得 */
 export function getUserInfo(): { email?: string; name?: string; picture?: string } | null {
-  if (!idToken) return null;
+  const token = idToken ?? localStorage.getItem('bhs_id_token');
+  if (!token) return null;
   try {
-    const payload = JSON.parse(atob(idToken.split('.')[1]));
+    const payload = JSON.parse(atob(token.split('.')[1]));
     return {
       email: payload.email,
       name: payload.name,
@@ -212,7 +226,7 @@ export function getUserInfo(): { email?: string; name?: string; picture?: string
   }
 }
 
-/** 初期化（ページロード時にリフレッシュトークンからセッション復元を試みる） */
+/** 初期化（ページロード時にトークンを復元） */
 export async function initAuth(): Promise<boolean> {
   const token = await getAccessToken();
   return !!token;
