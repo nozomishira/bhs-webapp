@@ -84,7 +84,7 @@ export default function ChatHistoryPage() {
             {sessions.map((session) => (
               <Link
                 key={session.sessionId}
-                href={`/chat/history/${session.sessionId}`}
+                href={`/chat/history/detail?id=${session.sessionId}`}
                 className="flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
               >
                 <span className="text-2xl">
