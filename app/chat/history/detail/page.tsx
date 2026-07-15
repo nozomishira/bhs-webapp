@@ -64,14 +64,14 @@ function HistoryDetailContent() {
           </button>
         )}
         <a
-          href="/chat"
+          href="/chat.html"
           onClick={(e) => {
             e.preventDefault();
             localStorage.setItem('bhs_resume_chat', JSON.stringify({
               scenarioId: detail.scenarioId,
               messages: detail.messages,
             }));
-            window.location.href = '/chat';
+            window.location.href = '/chat.html';
           }}
           className="px-3 py-1.5 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700"
         >
