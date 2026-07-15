@@ -102,6 +102,18 @@ export default function ChatWindow({ scenarioId, onBack, initialMessages, resume
     try {
       const res = await evaluateChat({ scenarioId, messages });
       setEvaluation(res.evaluation);
+
+      // 採点結果を含めて即座に保存（同じsessionIdなら上書き）
+      const userMessageCount = messages.filter((m) => m.role === 'user').length;
+      if (userMessageCount >= 2) {
+        saveChatHistory({
+          scenarioId,
+          scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
+          messages,
+          evaluation: res.evaluation,
+          ...(sessionId ? { sessionId } : {}),
+        }).catch((e) => console.warn('saveChatHistory failed:', e));
+      }
     } catch (e) {
       console.error(e);
       setError('採点に失敗しました。もう一度お試しください。');

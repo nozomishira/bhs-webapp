@@ -67,12 +67,16 @@ function HistoryDetailContent() {
           href="/chat.html"
           onClick={(e) => {
             e.preventDefault();
-            localStorage.setItem('bhs_resume_chat', JSON.stringify({
+            const data = JSON.stringify({
               scenarioId: detail.scenarioId,
               messages: detail.messages,
               sessionId: detail.sessionId,
-            }));
-            window.location.href = '/chat.html';
+            });
+            localStorage.setItem('bhs_resume_chat', data);
+            // 書き込み確認後に遷移
+            if (localStorage.getItem('bhs_resume_chat') === data) {
+              window.location.href = '/chat.html';
+            }
           }}
           className="px-3 py-1.5 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700"
         >
