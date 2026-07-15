@@ -124,12 +124,12 @@ export default function ChatWindow({ scenarioId, onBack, initialMessages, resume
 
   const handleEndChat = async () => {
     const userMessageCount = messages.filter((m) => m.role === 'user').length;
-    if (userMessageCount >= 2) {
+    // 採点済み（evaluation あり）の場合は採点時に既に保存済みなのでスキップ
+    if (userMessageCount >= 2 && !evaluation) {
       saveChatHistory({
         scenarioId,
         scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
         messages,
-        ...(evaluation ? { evaluation } : {}),
         ...(sessionId ? { sessionId } : {}),
       }).catch((e) => console.warn('saveChatHistory failed:', e));
     }
