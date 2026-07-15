@@ -8,6 +8,7 @@ interface ChatWindowProps {
   scenarioId: string;
   onBack: () => void;
   initialMessages?: ChatMessage[];
+  resumeSessionId?: string;
 }
 
 const SCENARIO_NAMES: Record<string, string> = {
@@ -18,8 +19,9 @@ const SCENARIO_NAMES: Record<string, string> = {
   free: 'フリー会話',
 };
 
-export default function ChatWindow({ scenarioId, onBack, initialMessages }: ChatWindowProps) {
+export default function ChatWindow({ scenarioId, onBack, initialMessages, resumeSessionId }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages ?? []);
+  const [sessionId] = useState<string | undefined>(resumeSessionId);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,7 +111,6 @@ export default function ChatWindow({ scenarioId, onBack, initialMessages }: Chat
   };
 
   const handleEndChat = async () => {
-    // ユーザーが1回以上返信した場合のみ保存
     const userMessageCount = messages.filter((m) => m.role === 'user').length;
     if (userMessageCount >= 2) {
       saveChatHistory({
@@ -117,6 +118,7 @@ export default function ChatWindow({ scenarioId, onBack, initialMessages }: Chat
         scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
         messages,
         ...(evaluation ? { evaluation } : {}),
+        ...(sessionId ? { sessionId } : {}),
       }).catch((e) => console.warn('saveChatHistory failed:', e));
     }
     onBack();

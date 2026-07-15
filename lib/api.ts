@@ -236,6 +236,7 @@ export interface SaveChatHistoryParams {
   scenarioName: string;
   messages: ChatMessage[];
   evaluation?: ChatEvaluation;
+  sessionId?: string;  // 再開時は同じ sessionId で上書き
 }
 
 export async function saveChatHistory(params: SaveChatHistoryParams): Promise<{ sessionId: string }> {

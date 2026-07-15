@@ -70,6 +70,7 @@ function HistoryDetailContent() {
             localStorage.setItem('bhs_resume_chat', JSON.stringify({
               scenarioId: detail.scenarioId,
               messages: detail.messages,
+              sessionId: detail.sessionId,
             }));
             window.location.href = '/chat.html';
           }}

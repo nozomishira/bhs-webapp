@@ -24,10 +24,24 @@ export default function ChatPage() {
     if (typeof window === 'undefined') return undefined;
     const resume = localStorage.getItem('bhs_resume_chat');
     if (resume) {
-      localStorage.removeItem('bhs_resume_chat');
       try {
         const data = JSON.parse(resume);
         return data.messages;
+      } catch {
+        return undefined;
+      }
+    }
+    return undefined;
+  });
+
+  const [resumeSessionId] = useState<string | undefined>(() => {
+    if (typeof window === 'undefined') return undefined;
+    const resume = localStorage.getItem('bhs_resume_chat');
+    if (resume) {
+      localStorage.removeItem('bhs_resume_chat');
+      try {
+        const data = JSON.parse(resume);
+        return data.sessionId;
       } catch {
         return undefined;
       }
@@ -44,6 +58,7 @@ export default function ChatPage() {
       scenarioId={selectedScenario}
       onBack={() => setSelectedScenario(null)}
       initialMessages={initialMessages}
+      resumeSessionId={resumeSessionId}
     />
   );
 }
