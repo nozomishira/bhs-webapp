@@ -7,6 +7,7 @@ import ChatEvaluationModal from './ChatEvaluationModal';
 interface ChatWindowProps {
   scenarioId: string;
   onBack: () => void;
+  initialMessages?: ChatMessage[];
 }
 
 const SCENARIO_NAMES: Record<string, string> = {
@@ -17,8 +18,8 @@ const SCENARIO_NAMES: Record<string, string> = {
   free: 'フリー会話',
 };
 
-export default function ChatWindow({ scenarioId, onBack }: ChatWindowProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+export default function ChatWindow({ scenarioId, onBack, initialMessages }: ChatWindowProps) {
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages ?? []);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,12 +33,13 @@ export default function ChatWindow({ scenarioId, onBack }: ChatWindowProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // 初回: AI からの最初の挨拶を取得
+  // 初回: AI からの最初の挨拶を取得（initialMessages がある場合はスキップ）
   useEffect(() => {
+    if (initialMessages && initialMessages.length > 0) return;
+
     const getGreeting = async () => {
       setLoading(true);
       try {
-        // 空のユーザーメッセージで最初の挨拶を促す
         const res = await postChat({
           scenarioId,
           messages: [{ role: 'user', content: 'こんにちは、会話を始めましょう' }],
@@ -127,6 +129,19 @@ export default function ChatWindow({ scenarioId, onBack }: ChatWindowProps) {
     }
   };
 
+  const handleEndChat = async () => {
+    // ユーザーが1回以上返信した場合のみ保存（初回挨拶のみは保存しない）
+    const userMessageCount = messages.filter((m) => m.role === 'user').length;
+    if (userMessageCount >= 2) {
+      saveChatHistory({
+        scenarioId,
+        scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
+        messages,
+      }).catch((e) => console.warn('saveChatHistory failed:', e));
+    }
+    onBack();
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
       {/* ヘッダー */}
@@ -150,6 +165,13 @@ export default function ChatWindow({ scenarioId, onBack }: ChatWindowProps) {
           className="px-4 py-2 bg-orange-500 text-white text-sm font-bold rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           {evaluating ? '採点中...' : '採点する'}
+        </button>
+        <button
+          onClick={handleEndChat}
+          disabled={messages.length < 2 || loading || evaluating}
+          className="px-4 py-2 bg-gray-500 text-white text-sm font-bold rounded-lg hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          終了する
         </button>
       </div>
 

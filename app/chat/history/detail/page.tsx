@@ -63,6 +63,12 @@ function HistoryDetailContent() {
             採点結果
           </button>
         )}
+        <a
+          href={`/chat?scenario=${detail.scenarioId}&messages=${encodeURIComponent(JSON.stringify(detail.messages))}`}
+          className="px-3 py-1.5 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700"
+        >
+          再開する
+        </a>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
