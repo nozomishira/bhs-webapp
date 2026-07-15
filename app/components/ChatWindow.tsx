@@ -21,12 +21,13 @@ const SCENARIO_NAMES: Record<string, string> = {
 
 export default function ChatWindow({ scenarioId, onBack, initialMessages, resumeSessionId }: ChatWindowProps) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages ?? []);
-  const [sessionId] = useState<string | undefined>(resumeSessionId);
+  const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(resumeSessionId);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [evaluating, setEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState<ChatEvaluation | null>(null);
+  const savedRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -106,13 +107,17 @@ export default function ChatWindow({ scenarioId, onBack, initialMessages, resume
       // 採点結果を含めて即座に保存（同じsessionIdなら上書き）
       const userMessageCount = messages.filter((m) => m.role === 'user').length;
       if (userMessageCount >= 2) {
-        saveChatHistory({
+        const result = await saveChatHistory({
           scenarioId,
           scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
           messages,
           evaluation: res.evaluation,
-          ...(sessionId ? { sessionId } : {}),
-        }).catch((e) => console.warn('saveChatHistory failed:', e));
+          ...(currentSessionId ? { sessionId: currentSessionId } : {}),
+        });
+        if (result.sessionId) {
+          setCurrentSessionId(result.sessionId);
+        }
+        savedRef.current = true;
       }
     } catch (e) {
       console.error(e);
@@ -124,14 +129,17 @@ export default function ChatWindow({ scenarioId, onBack, initialMessages, resume
 
   const handleEndChat = async () => {
     const userMessageCount = messages.filter((m) => m.role === 'user').length;
-    // 採点済み（evaluation あり）の場合は採点時に既に保存済みなのでスキップ
-    if (userMessageCount >= 2 && !evaluation) {
-      saveChatHistory({
+    // 既に保存済み（採点時に保存）ならスキップ
+    if (userMessageCount >= 2 && !savedRef.current) {
+      const result = await saveChatHistory({
         scenarioId,
         scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
         messages,
-        ...(sessionId ? { sessionId } : {}),
-      }).catch((e) => console.warn('saveChatHistory failed:', e));
+        ...(currentSessionId ? { sessionId: currentSessionId } : {}),
+      });
+      if (result.sessionId) {
+        setCurrentSessionId(result.sessionId);
+      }
     }
     onBack();
   };
