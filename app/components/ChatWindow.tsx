@@ -100,27 +100,6 @@ export default function ChatWindow({ scenarioId, onBack, initialMessages }: Chat
     try {
       const res = await evaluateChat({ scenarioId, messages });
       setEvaluation(res.evaluation);
-
-      // DynamoDB に会話履歴 + 採点結果を保存
-      saveChatHistory({
-        scenarioId,
-        scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
-        messages,
-        evaluation: res.evaluation,
-      }).catch((e) => console.warn('saveChatHistory failed:', e));
-
-      // localStorage にも保存（オフライン用）
-      const history = JSON.parse(localStorage.getItem('bhs_chat_history') ?? '[]');
-      history.unshift({
-        id: Date.now().toString(),
-        scenarioId,
-        scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
-        messages,
-        evaluation: res.evaluation,
-        createdAt: new Date().toISOString(),
-      });
-      // 最新20件のみ保持
-      localStorage.setItem('bhs_chat_history', JSON.stringify(history.slice(0, 20)));
     } catch (e) {
       console.error(e);
       setError('採点に失敗しました。もう一度お試しください。');
@@ -130,13 +109,14 @@ export default function ChatWindow({ scenarioId, onBack, initialMessages }: Chat
   };
 
   const handleEndChat = async () => {
-    // ユーザーが1回以上返信した場合のみ保存（初回挨拶のみは保存しない）
+    // ユーザーが1回以上返信した場合のみ保存
     const userMessageCount = messages.filter((m) => m.role === 'user').length;
     if (userMessageCount >= 2) {
       saveChatHistory({
         scenarioId,
         scenarioName: SCENARIO_NAMES[scenarioId] ?? scenarioId,
         messages,
+        ...(evaluation ? { evaluation } : {}),
       }).catch((e) => console.warn('saveChatHistory failed:', e));
     }
     onBack();
@@ -146,13 +126,6 @@ export default function ChatWindow({ scenarioId, onBack, initialMessages }: Chat
     <div className="flex flex-col h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
       {/* ヘッダー */}
       <div className="flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200 shadow-sm">
-        <button
-          onClick={onBack}
-          className="text-gray-500 hover:text-red-600 transition-colors font-bold text-lg"
-          aria-label="戻る"
-        >
-          ← 
-        </button>
         <div className="flex-1">
           <h1 className="text-lg font-bold text-slate-900">
             {SCENARIO_NAMES[scenarioId] ?? 'チャット'}
@@ -171,7 +144,7 @@ export default function ChatWindow({ scenarioId, onBack, initialMessages }: Chat
           disabled={messages.length < 2 || loading || evaluating}
           className="px-4 py-2 bg-gray-500 text-white text-sm font-bold rounded-lg hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
-          終了する
+          保存して終了
         </button>
       </div>
 

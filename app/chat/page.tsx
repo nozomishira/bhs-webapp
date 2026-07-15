@@ -1,21 +1,33 @@
 'use client';
 
-import { Suspense, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import ChatScenarioSelect from '@/app/components/ChatScenarioSelect';
 import ChatWindow from '@/app/components/ChatWindow';
 import { ChatMessage } from '@/lib/api';
 
-function ChatPageContent() {
-  const searchParams = useSearchParams();
-  const resumeScenario = searchParams.get('scenario');
-  const resumeMessages = searchParams.get('messages');
-
-  const [selectedScenario, setSelectedScenario] = useState<string | null>(resumeScenario);
-  const [initialMessages, setInitialMessages] = useState<ChatMessage[] | undefined>(() => {
-    if (resumeMessages) {
+export default function ChatPage() {
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const resume = localStorage.getItem('bhs_resume_chat');
+    if (resume) {
       try {
-        return JSON.parse(decodeURIComponent(resumeMessages));
+        const data = JSON.parse(resume);
+        return data.scenarioId ?? null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const [initialMessages] = useState<ChatMessage[] | undefined>(() => {
+    if (typeof window === 'undefined') return undefined;
+    const resume = localStorage.getItem('bhs_resume_chat');
+    if (resume) {
+      localStorage.removeItem('bhs_resume_chat');
+      try {
+        const data = JSON.parse(resume);
+        return data.messages;
       } catch {
         return undefined;
       }
@@ -24,32 +36,14 @@ function ChatPageContent() {
   });
 
   if (!selectedScenario) {
-    return <ChatScenarioSelect onSelect={(id) => {
-      setSelectedScenario(id);
-      setInitialMessages(undefined);
-    }} />;
+    return <ChatScenarioSelect onSelect={setSelectedScenario} />;
   }
 
   return (
     <ChatWindow
       scenarioId={selectedScenario}
-      onBack={() => {
-        setSelectedScenario(null);
-        setInitialMessages(undefined);
-      }}
+      onBack={() => setSelectedScenario(null)}
       initialMessages={initialMessages}
     />
-  );
-}
-
-export default function ChatPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500" />
-      </div>
-    }>
-      <ChatPageContent />
-    </Suspense>
   );
 }

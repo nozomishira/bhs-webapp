@@ -64,7 +64,15 @@ function HistoryDetailContent() {
           </button>
         )}
         <a
-          href={`/chat?scenario=${detail.scenarioId}&messages=${encodeURIComponent(JSON.stringify(detail.messages))}`}
+          href="/chat"
+          onClick={(e) => {
+            e.preventDefault();
+            localStorage.setItem('bhs_resume_chat', JSON.stringify({
+              scenarioId: detail.scenarioId,
+              messages: detail.messages,
+            }));
+            window.location.href = '/chat';
+          }}
           className="px-3 py-1.5 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700"
         >
           再開する
