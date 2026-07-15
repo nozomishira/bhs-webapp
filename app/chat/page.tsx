@@ -5,49 +5,27 @@ import ChatScenarioSelect from '@/app/components/ChatScenarioSelect';
 import ChatWindow from '@/app/components/ChatWindow';
 import { ChatMessage } from '@/lib/api';
 
-export default function ChatPage() {
-  const [selectedScenario, setSelectedScenario] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const resume = localStorage.getItem('bhs_resume_chat');
-    if (resume) {
-      try {
-        const data = JSON.parse(resume);
-        return data.scenarioId ?? null;
-      } catch {
-        return null;
-      }
-    }
+interface ResumeData {
+  scenarioId: string;
+  messages: ChatMessage[];
+  sessionId?: string;
+}
+
+function getResumeData(): ResumeData | null {
+  if (typeof window === 'undefined') return null;
+  const raw = localStorage.getItem('bhs_resume_chat');
+  if (!raw) return null;
+  localStorage.removeItem('bhs_resume_chat');
+  try {
+    return JSON.parse(raw) as ResumeData;
+  } catch {
     return null;
-  });
+  }
+}
 
-  const [initialMessages] = useState<ChatMessage[] | undefined>(() => {
-    if (typeof window === 'undefined') return undefined;
-    const resume = localStorage.getItem('bhs_resume_chat');
-    if (resume) {
-      try {
-        const data = JSON.parse(resume);
-        return data.messages;
-      } catch {
-        return undefined;
-      }
-    }
-    return undefined;
-  });
-
-  const [resumeSessionId] = useState<string | undefined>(() => {
-    if (typeof window === 'undefined') return undefined;
-    const resume = localStorage.getItem('bhs_resume_chat');
-    if (resume) {
-      localStorage.removeItem('bhs_resume_chat');
-      try {
-        const data = JSON.parse(resume);
-        return data.sessionId;
-      } catch {
-        return undefined;
-      }
-    }
-    return undefined;
-  });
+export default function ChatPage() {
+  const [resumeData] = useState<ResumeData | null>(getResumeData);
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(resumeData?.scenarioId ?? null);
 
   if (!selectedScenario) {
     return <ChatScenarioSelect onSelect={setSelectedScenario} />;
@@ -57,8 +35,8 @@ export default function ChatPage() {
     <ChatWindow
       scenarioId={selectedScenario}
       onBack={() => setSelectedScenario(null)}
-      initialMessages={initialMessages}
-      resumeSessionId={resumeSessionId}
+      initialMessages={resumeData?.messages}
+      resumeSessionId={resumeData?.sessionId}
     />
   );
 }
