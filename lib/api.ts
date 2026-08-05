@@ -302,3 +302,38 @@ export async function updateProfile(params: UpdateProfileParams): Promise<UserPr
   const json = await res.json();
   return (json.data ?? json) as UserProfile;
 }
+
+// --------------------------------------------------------
+// Coach API
+// --------------------------------------------------------
+
+export interface CoachResponse {
+  reply: string;
+  blocked?: boolean;
+}
+
+export async function postCoach(message: string): Promise<CoachResponse> {
+  const url = `${API_BASE}/coach`;
+  const token = await getAccessToken();
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ message }),
+  });
+
+  if (res.status === 401) {
+    window.location.href = '/';
+    throw new Error('Unauthorized');
+  }
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    throw new Error(`Coach API error ${res.status}: ${errorBody}`);
+  }
+
+  const json = await res.json();
+  return (json.data ?? json) as CoachResponse;
+}

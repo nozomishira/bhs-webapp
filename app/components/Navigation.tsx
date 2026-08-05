@@ -37,6 +37,7 @@ export default function Navigation() {
     { path: '/quiz/grammar', label: '文法' },
     { path: '/chat', label: '会話' },
     { path: '/chat/history', label: '履歴' },
+    { path: '/coach', label: 'コーチ' },
     { path: '/quiz/reading', label: '長文' },
     { path: '/quiz/exam', label: '検定' },
     { path: '/blog', label: 'ブログ' },
